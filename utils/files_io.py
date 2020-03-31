@@ -4,8 +4,8 @@ import os
 
 def load_jsonl(path):
     with open(path, 'r') as json_file:
-        return list(json_file)
-
+        lines = list(json_file)
+        return [json.loads(line) for line in lines]
 
 def write_json_file(filename, data):
     _, ext = os.path.splitext(filename)
