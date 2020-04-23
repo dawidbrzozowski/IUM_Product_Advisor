@@ -1,13 +1,11 @@
 from utils.files_io import load_jsonl, write_json_file
 import pandas as pd
 
-USERS_PATH = 'data/users.jsonl'
-SESSIONS_PATH = 'data/sessions.jsonl'
-PRODUCTS_PATH = 'data/products.jsonl'
+DEFAULT_USERS_PATH = 'data/users.jsonl'
+DEFAULT_SESSIONS_PATH = 'data/sessions.jsonl'
+DEFAULT_PRODUCTS_PATH = 'data/products.jsonl'
 
-CLEAN_USERS_PATH = 'data/clean-users.json'
-CLEAN_PRODUCTS_PATH = 'data/clean-products.json'
-CLEAN_SESSIONS_PATH = 'data/clean-sessions.json'
+SAVE_DIR = 'data/'
 
 USER_UNNECESSARY_ATTRIBUTES = ['street', 'name']
 
@@ -19,31 +17,16 @@ N_SIGMA = 3
 
 class Preprocessor:
 
-    def __init__(self):
-        self._products = load_jsonl(PRODUCTS_PATH)
-        self._sessions = load_jsonl(SESSIONS_PATH)
-        self._users = load_jsonl(USERS_PATH)
-        # Narazie mysle, ze deliveries sa nam totalnie niepotrzebne. Jak zmienimy zdanie to je dodamy.
-
-    def get_cleaned_users(self):
-        return self._clean_users(USER_UNNECESSARY_ATTRIBUTES)
-
-    def get_cleaned_products(self):
-        return self._clean_products()
-
-    def get_cleaned_sessions(self):
-        return self._clean_sessions()
-
-    def _clean_users(self, unnecessary_attributes: list):
-        return [self._get_user_without_unnecessary_data(user, unnecessary_attributes) for user in self._users]
+    def clean_users(self, users, unnecessary_attributes: list):
+        return [self._get_user_without_unnecessary_data(user, unnecessary_attributes) for user in users]
 
     def _get_user_without_unnecessary_data(self, user: dict, unnecessary_attributes: list):
         for attribute in unnecessary_attributes:
             user.pop(attribute)
         return user
 
-    def _clean_products(self):
-        products = self._get_products_with_possible_price(self._products)
+    def clean_products(self, products):
+        products = self._get_products_with_possible_price(products)
         products_df = pd.DataFrame(products)
         means = products_df[['category_path', 'price']].groupby('category_path').mean()
         stds = products_df[['category_path', 'price']].groupby('category_path').std()
@@ -67,8 +50,8 @@ class Preprocessor:
                 products_within_sigma.append(product)
         return products_within_sigma
 
-    def _clean_sessions(self):
-        sessions = self._fill_missing_user_id_where_possible(self._sessions)
+    def clean_sessions(self, sessions):
+        sessions = self._fill_missing_user_id_where_possible(sessions)
         sessions = self._drop_sessions_without_user_id(sessions)
         sessions = self._drop_sessions_without_product_id(sessions)
         sessions = self._drop_buy_sessions_without_purchase_id(sessions)
@@ -126,18 +109,28 @@ class Preprocessor:
         return sessions[i]['session_id']
 
 
-def save_clean_data():
+def read_users_sessions_products(users_path=DEFAULT_USERS_PATH, sessions_path=DEFAULT_SESSIONS_PATH,
+                                 products_path=DEFAULT_PRODUCTS_PATH):
+    users = load_jsonl(users_path)
+    sessions = load_jsonl(sessions_path)
+    products = load_jsonl(products_path)
+    return users, sessions, products
+
+
+def save_clean_data(users, sessions, products, save_dir):
     preprocessor = Preprocessor()
-    products = preprocessor.get_cleaned_products()
-    users = preprocessor.get_cleaned_users()
-    sessions = preprocessor.get_cleaned_sessions()
-    write_json_file(CLEAN_PRODUCTS_PATH, products)
-    write_json_file(CLEAN_USERS_PATH, users)
-    write_json_file(CLEAN_SESSIONS_PATH, sessions)
+    clean_users = preprocessor.clean_users(users, USER_UNNECESSARY_ATTRIBUTES)
+    clean_sessions = preprocessor.clean_sessions(sessions)
+    clean_products = preprocessor.clean_products(products)
+
+    write_json_file(save_dir + 'clean-users', clean_users)
+    write_json_file(save_dir + 'clean-sessions', clean_sessions)
+    write_json_file(save_dir + 'clean-products', clean_products)
 
 
 def main():
-    save_clean_data()
+    users, sessions, products = read_users_sessions_products()
+    save_clean_data(users, sessions, products, SAVE_DIR)
 
 
 if __name__ == '__main__':
