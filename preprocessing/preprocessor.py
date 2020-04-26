@@ -15,6 +15,7 @@ MAX_POSSIBLE_VALUE = 100000
 
 N_SIGMA = 3
 
+
 class Preprocessor:
 
     def clear_data(self, users, sessions, products):
@@ -44,17 +45,17 @@ class Preprocessor:
         for product in products:
             current_mean = means.loc[product['category_path']]['price']
             current_n_std = N_SIGMA * stds.loc[product['category_path']]['price']
-            if  -current_n_std < product['price'] - current_mean < current_n_std:
+            if -current_n_std < product['price'] - current_mean < current_n_std:
                 products_within_sigma.append(product)
         return products_within_sigma
 
     def _clear_sessions(self, sessions):
         sessions = self._fill_missing_user_id_where_possible(sessions)
-        sessions = self._drop_sessions_with_none(sessions, 'user_id')
-        sessions = self._drop_sessions_with_none(sessions, 'product_id')
+        sessions = self._drop_sessions_with_none_attribute(sessions, 'user_id')
+        sessions = self._drop_sessions_with_none_attribute(sessions, 'product_id')
         sessions = self._drop_buy_sessions_without_purchase_id(sessions)
         return sessions
-    
+
     def _fill_missing_user_id_where_possible(self, sessions):
         for i, session in enumerate(sessions):
             if session['user_id'] is None:
@@ -65,13 +66,13 @@ class Preprocessor:
     def _find_user_id_from_neighbours(self, sessions, i):
         prev_not_null_user_id = self._get_prev_not_null_user_id(sessions, i)
         next_not_null_user_id = self._get_next_not_null_user_id(sessions, i)
-    
+
         # jezeli poprzedni rekord ma taki sam user_id jak nastepny, to wpisz ten user_id
         if prev_not_null_user_id == next_not_null_user_id:
             return next_not_null_user_id
 
         # jezeli id sesji poprzedniego rekordu jest takie samo, to znaczy, ze musi to byc ten sam user_id
-        if  self._get_prev_not_null_session_id(sessions, i) == sessions[i]['session_id']:
+        if self._get_prev_not_null_session_id(sessions, i) == sessions[i]['session_id']:
             return prev_not_null_user_id
 
         # jezeli id sesji nastepnego rekordu jest takie samo, to znaczy, ze musi byc to ten sam user_id
@@ -79,11 +80,8 @@ class Preprocessor:
             return next_not_null_user_id
         return None
 
-    def _drop_sessions_without_user_id(self, sessions):
-        return [session for session in sessions if session['user_id'] is not None]
-
-    def _drop_sessions_without_product_id(self, sessions):
-        return [session for session in sessions if session['product_id'] is not None]
+    def _drop_sessions_with_none_attribute(self, sessions, attribute_name):
+        return [session for session in sessions if session[attribute_name] is not None]
 
     def _drop_buy_sessions_without_purchase_id(self, sessions):
         return [session for session in sessions if not
@@ -112,17 +110,20 @@ class Preprocessor:
             i += 1
         return sessions[i]['session_id']
 
+
 def read_data(users_path=DEFAULT_USERS_PATH, sessions_path=DEFAULT_SESSIONS_PATH,
-                                 products_path=DEFAULT_PRODUCTS_PATH):
+              products_path=DEFAULT_PRODUCTS_PATH):
     users = load_jsonl(users_path)
     sessions = load_jsonl(sessions_path)
     products = load_jsonl(products_path)
     return users, sessions, products
-    
+
+
 def write_data(clean_users, clean_sessions, clean_products):
     write_json_file(SAVE_DIR + 'clean-users', clean_users)
     write_json_file(SAVE_DIR + 'clean-sessions', clean_sessions)
     write_json_file(SAVE_DIR + 'clean-products', clean_products)
+
 
 def main():
     users, sessions, products = read_data()
