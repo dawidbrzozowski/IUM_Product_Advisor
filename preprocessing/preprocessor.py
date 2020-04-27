@@ -21,12 +21,12 @@ N_SIGMA = 3
 
 
 class Preprocessor:
-    timestamp_handler = None
-    user_id_filler = None
+    _timestamp_handler = None
+    _user_id_filler = None
 
     def __init__(self):
-        timestamp_handler = TimestampHandler()
-        user_id_filler = UserIdFiller()
+        self._timestamp_handler = TimestampHandler()
+        self._user_id_filler = UserIdFiller()
 
     def clear_data(self, users, sessions, products):
         return self._clear_users(users), self._clear_sessions(sessions), self._clear_products(products)
@@ -60,13 +60,22 @@ class Preprocessor:
         return products_within_sigma
 
     def _clear_sessions(self, sessions):
-        sessions = self._fill_missing_user_id_where_possible(sessions)
+        sessions = self._user_id_filler.fill_missing_user_id_where_possible(sessions)
         sessions = self._drop_sessions_with_none_attribute(sessions, 'user_id')
         sessions = self._drop_sessions_with_none_attribute(sessions, 'product_id')
-        sessions = user_id_filler._drop_buy_sessions_without_purchase_id(sessions)
-        sessions = timestamp_handler._turn_timestamp_into_age(sessions)
+        sessions = self._drop_buy_sessions_without_purchase_id(sessions)
+        sessions = self._timestamp_handler.turn_timestamp_into_age(sessions)
         return sessions
 
+    def _drop_buy_sessions_without_purchase_id(self, sessions):
+        return [session for session in sessions if not
+        (session['event_type'] == 'BUY_PRODUCT' and session['purchase_id'] is None)]
+    
+    def _drop_sessions_with_none_attribute(self, sessions, attribute_name):
+        return [session for session in sessions if session[attribute_name] is not None]
+
+    def _drop_sessions_without_timestamp(self, sessions):
+        return [session for session in sessions if session['timestamp'] is not None]
 
 def read_data(users_path=DEFAULT_USERS_PATH, sessions_path=DEFAULT_SESSIONS_PATH,
               products_path=DEFAULT_PRODUCTS_PATH):
