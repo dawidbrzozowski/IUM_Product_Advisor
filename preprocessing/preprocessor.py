@@ -1,7 +1,9 @@
 from utils.files_io import load_jsonl, write_json_file
 from datetime import datetime
 import pandas as pd
-import maya
+
+from preprocessing.timestamp_handler import TimestampHandler
+from preprocessing.user_id_filler import UserIdFiller
 
 SAVE_DIR = 'data/'
 
@@ -19,6 +21,12 @@ N_SIGMA = 3
 
 
 class Preprocessor:
+    timestamp_handler = None
+    user_id_filler = None
+
+    def __init__(self):
+        timestamp_handler = TimestampHandler()
+        user_id_filler = UserIdFiller()
 
     def clear_data(self, users, sessions, products):
         return self._clear_users(users), self._clear_sessions(sessions), self._clear_products(products)
@@ -55,109 +63,9 @@ class Preprocessor:
         sessions = self._fill_missing_user_id_where_possible(sessions)
         sessions = self._drop_sessions_with_none_attribute(sessions, 'user_id')
         sessions = self._drop_sessions_with_none_attribute(sessions, 'product_id')
-        sessions = self._drop_buy_sessions_without_purchase_id(sessions)
-        sessions = self._turn_timestamp_into_age(sessions)
+        sessions = user_id_filler._drop_buy_sessions_without_purchase_id(sessions)
+        sessions = timestamp_handler._turn_timestamp_into_age(sessions)
         return sessions
-
-    def _turn_timestamp_into_age(self, sessions):
-        # age to znormalizowana różnica między aktualnym timestampem, a najwcześniejszym
-        # timestampem dla każdego użytkownika
-        sessions = self._add_age_column(sessions)
-        sessions = self._drop(sessions, 'timestamp')
-        return sessions
-
-    def _drop(self, sessions, to_drop):
-        for session in sessions:
-                session.pop(to_drop)
-        return sessions
-
-    def _add_age_column(self, sessions):
-        first, last = self._find_edge_entries_for_every_user(sessions)
-        sessions = self._calculate_age_from_timestamp(sessions, first, last)
-        return sessions
-    
-    def _calculate_age_from_timestamp(self, sessions, first, last):    
-        for session in sessions:
-            date = maya.parse(session['timestamp']).datetime()
-            # if last is first, there is only one entry
-            if last[session['user_id']] == first[session['user_id']]:
-                session['age'] = 1
-            else:
-                session['age'] = (date - first[session['user_id']]) / (last[session['user_id']] - first[session['user_id']])
-        return sessions
-
-    def _find_edge_entries_for_every_user(self, sessions):
-        # przechowuje najnowsze i najstarsze wejscie dla kazdego uzytkownika
-        first_entries = {}
-        last_entries = {}
-        for session in sessions:
-            current_date = maya.parse(session['timestamp']).datetime()
-            current_user_id = session['user_id']
-
-            first_entries[current_user_id] = self._find_minimising_value(first_entries, current_user_id, current_date)
-            last_entries[current_user_id] = self._find_maximising_value(last_entries, current_user_id, current_date)
-
-        return first_entries, last_entries
-    
-    def _find_minimising_value(self, first_entries, current_user_id, current_date):
-        return min(first_entries[current_user_id], current_date) if current_user_id in first_entries else current_date
-
-    def _find_maximising_value(self, last_entries, current_user_id, current_date):
-        return max(last_entries[current_user_id], current_date) if current_user_id in last_entries else current_date
-
-    def _fill_missing_user_id_where_possible(self, sessions):
-        for i, session in enumerate(sessions):
-            if session['user_id'] is None:
-                # ustaw wartosc sesji na podstawie sasiadow
-                session['user_id'] = self._find_user_id_from_neighbours(sessions, i)
-        return sessions
-
-    def _find_user_id_from_neighbours(self, sessions, i):
-        prev_not_null_user_id = self._get_prev_not_null_user_id(sessions, i)
-        next_not_null_user_id = self._get_next_not_null_user_id(sessions, i)
-
-        # jezeli poprzedni rekord ma taki sam user_id jak nastepny, to wpisz ten user_id
-        if prev_not_null_user_id == next_not_null_user_id:
-            return next_not_null_user_id
-
-        # jezeli id sesji poprzedniego rekordu jest takie samo, to znaczy, ze musi to byc ten sam user_id
-        if self._get_prev_not_null_session_id(sessions, i) == sessions[i]['session_id']:
-            return prev_not_null_user_id
-
-        # jezeli id sesji nastepnego rekordu jest takie samo, to znaczy, ze musi byc to ten sam user_id
-        if self._get_next_not_null_session_id(sessions, i) == sessions[i]['session_id']:
-            return next_not_null_user_id
-        return None
-
-    def _drop_sessions_with_none_attribute(self, sessions, attribute_name):
-        return [session for session in sessions if session[attribute_name] is not None]
-
-    def _drop_buy_sessions_without_purchase_id(self, sessions):
-        return [session for session in sessions if not
-        (session['event_type'] == 'BUY_PRODUCT' and session['purchase_id'] is None)]
-
-    def _drop_sessions_without_timestamp(self, sessions):
-        return [session for session in sessions if session['timestamp'] is not None]
-
-    def _get_prev_not_null_user_id(self, sessions, i):
-        while i >= 0 and sessions[i]['user_id'] is None:
-            i -= 1
-        return sessions[i]['user_id']
-
-    def _get_next_not_null_user_id(self, sessions, i):
-        while i < len(sessions) and sessions[i]['user_id'] is None:
-            i += 1
-        return sessions[i]['user_id']
-
-    def _get_prev_not_null_session_id(self, sessions, i):
-        while i >= 0 and sessions[i]['user_id'] is None:
-            i -= 1
-        return sessions[i]['session_id']
-
-    def _get_next_not_null_session_id(self, sessions, i):
-        while i < len(sessions) and sessions[i]['user_id'] is None:
-            i += 1
-        return sessions[i]['session_id']
 
 
 def read_data(users_path=DEFAULT_USERS_PATH, sessions_path=DEFAULT_SESSIONS_PATH,
