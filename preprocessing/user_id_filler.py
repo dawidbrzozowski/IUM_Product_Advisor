@@ -12,23 +12,16 @@ class UserIdFiller:
         next_not_null_user_id, next_not_null_session_id = self._get_next_not_null_user_and_session_id(sessions, i)
 
         # jezeli poprzedni rekord ma taki sam user_id jak nastepny, to wpisz ten user_id
-        return next_not_null_user_id if prev_not_null_user_id == next_not_null_user_id
+        if prev_not_null_user_id == next_not_null_user_id:
+            return next_not_null_user_id
         # jezeli id sesji poprzedniego rekordu jest takie samo, to znaczy, ze musi to byc ten sam user_id
-        return prev_not_null_user_id if prev_not_null_session_id == sessions[i]['session_id']
+        if prev_not_null_session_id == sessions[i]['session_id']:
+            return prev_not_null_user_id 
         # jezeli id sesji nastepnego rekordu jest takie samo, to znaczy, ze musi byc to ten sam user_id
-        return next_not_null_user_id if next_not_null_session_id == sessions[i]['session_id']:
+        if next_not_null_session_id == sessions[i]['session_id']:
+            return next_not_null_user_id 
         
         return None
-
-    def _drop_sessions_with_none_attribute(self, sessions, attribute_name):
-        return [session for session in sessions if session[attribute_name] is not None]
-
-    def _drop_buy_sessions_without_purchase_id(self, sessions):
-        return [session for session in sessions if not
-        (session['event_type'] == 'BUY_PRODUCT' and session['purchase_id'] is None)]
-
-    def _drop_sessions_without_timestamp(self, sessions):
-        return [session for session in sessions if session['timestamp'] is not None]
 
     def _get_prev_not_null_user_and_session_id(self, sessions, i):
         while i >= 0 and sessions[i]['user_id'] is None:
