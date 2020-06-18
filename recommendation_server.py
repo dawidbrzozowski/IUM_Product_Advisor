@@ -13,8 +13,8 @@ def predict():
     '''
     For rendering results on HTML GUI
     '''
-
-    return render_template('index.html', prediction_text='Employee Salary should be $ {}'.format(request.form.values()))
+    x = request.form.get('user_id')
+    return render_template('index.html', prediction_text=f'Employee Salary should be {x}')
 
 @app.route('/predict_api',methods=['POST'])
 def predict_api():
