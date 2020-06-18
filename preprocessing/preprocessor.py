@@ -29,7 +29,13 @@ class Preprocessor:
         self._user_id_filler = UserIdFiller()
 
     def clear_data(self, users, sessions, products):
-        return self._clear_users(users), self._clear_sessions(sessions), self._clear_products(products)
+        clean_users = self._clear_users(users)
+        pre_cleared_sessions = self._clear_sessions(sessions)
+        clean_products = self._clear_products(products)
+        clean_sessions = self._filter_removed_products_from_sessions(pre_cleared_sessions, clean_products)
+
+        return clean_users, clean_sessions, clean_products
+
 
     def _clear_users(self, users):
         for user in users:
@@ -70,12 +76,18 @@ class Preprocessor:
     def _drop_buy_sessions_without_purchase_id(self, sessions):
         return [session for session in sessions if not
         (session['event_type'] == 'BUY_PRODUCT' and session['purchase_id'] is None)]
-    
+
     def _drop_sessions_with_none_attribute(self, sessions, attribute_name):
         return [session for session in sessions if session[attribute_name] is not None]
 
     def _drop_sessions_without_timestamp(self, sessions):
         return [session for session in sessions if session['timestamp'] is not None]
+
+    def _filter_removed_products_from_sessions(self, cleaned_sessions, cleaned_products):
+        product_ids = set()
+        for product in cleaned_products:
+            product_ids.add(product['product_id'])
+        return [session for session in cleaned_sessions if session['product_id'] in product_ids]
 
 def read_data(users_path=DEFAULT_USERS_PATH, sessions_path=DEFAULT_SESSIONS_PATH,
               products_path=DEFAULT_PRODUCTS_PATH):
