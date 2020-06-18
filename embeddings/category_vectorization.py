@@ -37,4 +37,3 @@ class CategoryVectorizer:
         for weight in category_weights:
             category_weights[weight] /= normalization_sum
         return list(category_weights.values())
-

@@ -21,8 +21,6 @@ N_SIGMA = 3
 
 
 class Preprocessor:
-    _timestamp_handler = None
-    _user_id_filler = None
 
     def __init__(self):
         self._timestamp_handler = TimestampHandler()
@@ -35,7 +33,6 @@ class Preprocessor:
         clean_sessions = self._filter_removed_products_from_sessions(pre_cleared_sessions, clean_products)
 
         return clean_users, clean_sessions, clean_products
-
 
     def _clear_users(self, users):
         for user in users:
@@ -88,6 +85,7 @@ class Preprocessor:
         for product in cleaned_products:
             product_ids.add(product['product_id'])
         return [session for session in cleaned_sessions if session['product_id'] in product_ids]
+
 
 def read_data(users_path=DEFAULT_USERS_PATH, sessions_path=DEFAULT_SESSIONS_PATH,
               products_path=DEFAULT_PRODUCTS_PATH):
