@@ -1,5 +1,5 @@
 from utils.files_io import load_jsonl, write_json_file
-from datetime import datetime
+from preprocessing.merger import create_model_input
 import pandas as pd
 
 from preprocessing.timestamp_handler import TimestampHandler
@@ -108,6 +108,10 @@ def main():
     preprocessor = Preprocessor()
     clean_users, clean_sessions, clean_products = preprocessor.clear_data(users, sessions, products)
     write_data(clean_users, clean_sessions, clean_products)
+
+    merged_data = create_model_input(clean_users, clean_sessions, clean_products)
+
+
 
 
 if __name__ == '__main__':
