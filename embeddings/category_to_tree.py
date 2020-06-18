@@ -1,18 +1,14 @@
 from typing import List
 
 from treelib import Tree
-from utils.files_io import load_json
-
-PRODUCT_PATH = 'data/clean-products.json'
 
 
-def get_category_paths_node_split(product_path=PRODUCT_PATH) -> List[list]:
-    category_paths = get_category_paths(product_path)
+def get_category_paths_node_split(products) -> List[list]:
+    category_paths = get_category_paths(products)
     return _get_paths_split_by_node(category_paths)
 
 
-def get_category_paths(product_path=PRODUCT_PATH) -> set:
-    products = load_json(product_path)
+def get_category_paths(products) -> set:
     categories = set()
     for product in products:
         categories.add(product['category_path'])
@@ -28,8 +24,8 @@ def _get_paths_split_by_node(category_paths):
 
 class CategoryTree:
 
-    def __init__(self, product_path=PRODUCT_PATH):
-        self.category_paths_split = get_category_paths_node_split(product_path)
+    def __init__(self, products):
+        self.category_paths_split = get_category_paths_node_split(products)
         self.tree = self._create_categories_tree()
 
     def _create_categories_tree(self) -> Tree:
@@ -56,17 +52,13 @@ class CategoryTree:
     def get_all_leafs(self):
         return self.get_descendants_of_node('root')
 
+    def get_leaf_from_category_path(self, category_path):
+        category_split = category_path.split(';')
+        return category_split[-1]
+
     def get_leaf2idx(self):
         leaf2idx = {}
         all_leafs = self.get_all_leafs()
         for i, leaf in enumerate(all_leafs):
             leaf2idx[leaf] = i
         return leaf2idx
-
-
-if __name__ == '__main__':
-    category_tree = CategoryTree()
-    print(category_tree.get_path_to_leaf('Gry Xbox 360'))
-    print(category_tree.get_descendants_of_node('Gry komputerowe'))
-# ['Gry komputerowe', 'Gry PlayStation3', 'Gry Xbox 360', 'Biurowe urządzenia wielofunkcyjne', 'Monitory LCD', 'Tablety'
-# 'Odtwarzacze mp3 i mp4', 'Odtwarzacze DVD', 'Anteny RTV', 'Zestawy głośnomówiące', 'Zestawy słuchawkowe']

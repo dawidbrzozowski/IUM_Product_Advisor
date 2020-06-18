@@ -1,5 +1,7 @@
-pandas
+pandas~=1.0.3
 notebook
-scikit-learn
+scikit-learn~=0.22.2.post1
 keras
-maya
+maya~=0.6.1
+numpy~=1.18.2
+treelib~=1.6.1
