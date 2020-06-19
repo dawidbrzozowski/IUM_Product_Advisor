@@ -22,9 +22,9 @@ class Vectorizer:
         for product in products:
             leaf_names = category_vectorizer.get_all_leafs()
             leafs_vectorized = category_vectorizer.get_vector_for_category_path(product['category_path'])
+            product['leafs'] = {}
             for leaf_name, leaf_vectorized in zip(leaf_names, leafs_vectorized):
-                product[leaf_name] = leaf_vectorized
-            product.pop('category_path')
+                product['leafs'][leaf_name] = leaf_vectorized
             products_with_vectorized_category.append(product)
         return products_with_vectorized_category
 

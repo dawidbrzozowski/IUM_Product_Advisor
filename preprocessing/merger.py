@@ -14,26 +14,31 @@ def create_model_input(sessions, products):
 def represent_session_as_single_row(merged_data, clean_products):
     product_ids = [product['product_id'] for product in clean_products]
     product_representation = {product_id: 0 for product_id in product_ids}
-
+    category_correlation = {category_leaf: 0 for category_leaf in merged_data[0]['leafs']}
     averaged_sessions = []
     current_session_id = -1
     current_session_avg = None
-
     for single_session in merged_data:
         if single_session['session_id'] != current_session_id:
             if current_session_id != -1:
                 current_session_avg.pop('product_id')
+                current_session_avg.pop('leafs')
+                current_session_avg.pop('category_path')
                 averaged_sessions.append(current_session_avg)
 
             current_session_id = single_session['session_id']
             current_session_avg = single_session.copy()
             current_session_avg.update(product_representation)
-
+            current_session_avg.update(category_correlation)
         product_id = single_session['product_id']
         current_session_avg[product_id] += 1
+        for leaf in single_session['leafs']:
+            current_session_avg[leaf] += single_session['leafs'][leaf]
 
     return averaged_sessions
 
+
+# todo normalizacja kategorii i wystapien produktow
 
 def split_into_x_y(merged_data):
     X = []
