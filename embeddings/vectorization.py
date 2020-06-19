@@ -15,14 +15,15 @@ class Vectorizer:
 
     def prepare_products(self, products):
         products = self._normalize_prices(products)
-        return self._vectorize_product_categories(products)
+        products = self._vectorize_product_categories(products)
+        return products
 
     def _vectorize_product_categories(self, products):
         products_with_vectorized_category = []
         category_vectorizer = CategoryVectorizer(products)
         for product in products:
             product['category_path'] = category_vectorizer.get_vector_for_category_path(product['category_path'])
-            products_with_vectorized_category.append(products)
+            products_with_vectorized_category.append(product)
         return products_with_vectorized_category
 
     def _normalize_prices(self, products):
