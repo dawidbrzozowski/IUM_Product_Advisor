@@ -2,7 +2,7 @@ from embeddings.vectorization import Vectorizer
 from preprocessing.data_cleaner import DataCleaner
 from utils.files_io import load_jsonl, write_json_file
 
-from preprocessing.merger import create_model_input
+from preprocessing.merger import create_model_input, split_into_x_y, represent_session_as_single_row
 
 DEFAULT_USERS_PATH = 'data/unprocessed/users.jsonl'
 DEFAULT_SESSIONS_PATH = 'data/unprocessed/sessions.jsonl'
@@ -57,7 +57,11 @@ def main():
     write_data(preprocessor.save_dir, clean_users, clean_sessions, clean_products)
 
     merged_data = create_model_input(clean_users, clean_sessions, clean_products)
+    merged_data = represent_session_as_single_row(merged_data, clean_products)
 
+    # write_json_file(preprocessor.save_dir + 'Y')
+    x, y = split_into_x_y(merged_data)
+    # print(x)
 
 if __name__ == '__main__':
     main()
