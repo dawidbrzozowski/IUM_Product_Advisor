@@ -56,12 +56,15 @@ def main():
     clean_users, clean_sessions, clean_products = preprocessor.preprocess_data(users, sessions, products)
     write_data(preprocessor.save_dir, clean_users, clean_sessions, clean_products)
 
-    merged_data = create_model_input(clean_users, clean_sessions, clean_products)
-    merged_data = represent_session_as_single_row(merged_data, clean_products)
+    merged_data = create_model_input(clean_sessions, clean_products)
+    write_json_file('merged', merged_data)
 
     # write_json_file(preprocessor.save_dir + 'Y')
     x, y = split_into_x_y(merged_data)
-    # print(x)
+    write_json_file('x', x)
+    merged_data = represent_session_as_single_row(x, clean_products)
+    write_json_file('temp', merged_data)
+
 
 if __name__ == '__main__':
     main()

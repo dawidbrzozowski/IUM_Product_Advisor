@@ -1,19 +1,17 @@
 import pandas as pd
-from utils.files_io import write_json_file
 
 
-def create_model_input(users, sessions, products):
-    users = pd.DataFrame(users)
+def create_model_input(sessions, products):
     sessions = pd.DataFrame(sessions)
     products = pd.DataFrame(products)
 
     merged = sessions.merge(products, on='product_id')
-    merged_cleaned = merged.drop(columns=['purchase_id', 'product_name', 'offered_discount'])
+    merged.sort_values(by=['session_id'], inplace=True)
+    merged_cleaned = merged.drop(columns=['purchase_id', 'product_name', 'offered_discount', 'user_id'])
     return merged_cleaned.to_dict(orient='records')
 
 
 def represent_session_as_single_row(merged_data, clean_products):
-    base_len = len(merged_data[0])
     product_ids = [product['product_id'] for product in clean_products]
     product_representation = {product_id: 0 for product_id in product_ids}
 
@@ -23,20 +21,17 @@ def represent_session_as_single_row(merged_data, clean_products):
 
     for single_session in merged_data:
         if single_session['session_id'] != current_session_id:
-            print('zmiana')
-
             if current_session_id != -1:
+                current_session_avg.pop('product_id')
                 averaged_sessions.append(current_session_avg)
 
             current_session_id = single_session['session_id']
-            current_session_avg = single_session
+            current_session_avg = single_session.copy()
             current_session_avg.update(product_representation)
 
         product_id = single_session['product_id']
         current_session_avg[product_id] += 1
 
-
-    print(averaged_sessions)
     return averaged_sessions
 
 
