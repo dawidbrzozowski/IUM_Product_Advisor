@@ -1,5 +1,7 @@
 import pandas as pd
 
+from utils.files_io import write_json_file
+
 
 def create_model_input(sessions, products):
     sessions = pd.DataFrame(sessions)
@@ -60,4 +62,15 @@ def get_matching_x_y(X, Y):
     for x in X:
         if x['session_id'] in y_sessions:
             X_match.append(x)
-    return X_match, Y
+
+    x_sessions = set()
+    Y_match = []
+    for x in X_match:
+        x_sessions.add(x['session_id'])
+    for y in Y:
+        if y['session_id'] in x_sessions:
+            Y_match.append(y)
+
+    write_json_file('xm', X_match)
+    write_json_file('ym', Y_match)
+    return X_match, Y_match

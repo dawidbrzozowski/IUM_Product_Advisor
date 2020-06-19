@@ -3,6 +3,7 @@ from preprocessing.data_cleaner import DataCleaner
 from utils.files_io import load_jsonl, write_json_file
 
 from preprocessing.merger import create_model_input, split_into_x_y, represent_session_as_single_row
+from sklearn.model_selection import train_test_split
 
 DEFAULT_USERS_PATH = 'data/unprocessed/users.jsonl'
 DEFAULT_SESSIONS_PATH = 'data/unprocessed/sessions.jsonl'
@@ -57,13 +58,11 @@ def main():
     write_data(preprocessor.save_dir, clean_users, clean_sessions, clean_products)
 
     merged_data = create_model_input(clean_sessions, clean_products)
-    write_json_file('merged', merged_data)
 
-    # write_json_file(preprocessor.save_dir + 'Y')
     x, y = split_into_x_y(merged_data)
-    write_json_file('x', x)
-    merged_data = represent_session_as_single_row(x, clean_products)
-    write_json_file('temp', merged_data)
+    x = represent_session_as_single_row(x, clean_products)
+    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    ...
 
 
 if __name__ == '__main__':
