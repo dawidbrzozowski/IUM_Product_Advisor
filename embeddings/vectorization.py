@@ -5,8 +5,6 @@ import numpy as np
 
 from embeddings.category_to_tree import CategoryTree
 
-CLEAN_USERS_PATH = 'data/clean-users.json'
-CLEAN_PRODUCTS_PATH = 'data/clean-products.json'
 N_MUL = 3
 INIT_POINT = 1.0
 
