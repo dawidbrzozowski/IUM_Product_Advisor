@@ -2,6 +2,12 @@ from embeddings.vectorization import Vectorizer
 from preprocessing.data_cleaner import DataCleaner
 from utils.files_io import load_jsonl, write_json_file
 
+from preprocessing.merger import create_model_input
+import pandas as pd
+
+from preprocessing.timestamp_handler import TimestampHandler
+from preprocessing.user_id_filler import UserIdFiller
+
 SAVE_DIR = 'data/'
 DEFAULT_USERS_PATH = SAVE_DIR + 'users.jsonl'
 DEFAULT_SESSIONS_PATH = SAVE_DIR + 'sessions.jsonl'
@@ -40,6 +46,10 @@ def main():
     preprocessor = Preprocessor()
     clean_users, clean_sessions, clean_products = preprocessor.preprocess_data(users, sessions, products)
     write_data(clean_users, clean_sessions, clean_products)
+
+    merged_data = create_model_input(clean_users, clean_sessions, clean_products)
+
+
 
 
 if __name__ == '__main__':
