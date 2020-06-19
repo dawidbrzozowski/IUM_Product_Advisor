@@ -2,7 +2,7 @@ from embeddings.vectorization import Vectorizer
 from preprocessing.data_cleaner import DataCleaner
 from utils.files_io import load_jsonl, write_json_file
 
-from preprocessing.merger import create_model_input
+from preprocessing.merger import create_model_input, split_into_x_y
 import pandas as pd
 
 from preprocessing.timestamp_handler import TimestampHandler
@@ -48,8 +48,7 @@ def main():
     write_data(clean_users, clean_sessions, clean_products)
 
     merged_data = create_model_input(clean_users, clean_sessions, clean_products)
-
-
+    x, y = split_into_x_y(merged_data)
 
 
 if __name__ == '__main__':
