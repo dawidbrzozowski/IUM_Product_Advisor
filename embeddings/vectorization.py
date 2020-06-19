@@ -1,10 +1,13 @@
 from collections import defaultdict
+
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+
 from embeddings.category_to_tree import CategoryTree
-from utils.files_io import load_json
 
 CLEAN_USERS_PATH = 'data/clean-users.json'
 CLEAN_PRODUCTS_PATH = 'data/clean-products.json'
-N_MUL = 4
+N_MUL = 3
 INIT_POINT = 1.0
 
 
@@ -23,7 +26,10 @@ class Vectorizer:
         return products_with_vectorized_category
 
     def _normalize_prices(self, products):
-        # todo normalizacja
+        prices = np.array([product['price'] for product in products])
+        prices_normalized = MinMaxScaler().fit_transform(prices.reshape(-1, 1))
+        for price_normalized, product in zip(prices_normalized, products):
+            product['price'] = price_normalized[0]
         return products
 
 
