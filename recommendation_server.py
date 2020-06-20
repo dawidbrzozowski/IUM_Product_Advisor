@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify, render_template
 
 from preprocessing.web_app_preprocessing import SessionRecommendationPreprocessor
-from recommenders.rankers import NNRecommendationGenerator
+from recommenders.rankers import NNRecommendationGenerator, CollaborativeRecommendationGenerator
 from utils.files_io import load_json
 
 app = Flask(__name__)
 
 srp = SessionRecommendationPreprocessor()
-recommendation_generator = NNRecommendationGenerator()
+# recommendation_generator = NNRecommendationGenerator()
+recommendation_generator = CollaborativeRecommendationGenerator()
 products_representation = srp.create_product_representation_for_web_app()
 
 
