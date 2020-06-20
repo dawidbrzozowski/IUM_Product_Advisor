@@ -1,16 +1,13 @@
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Nadam
-import pandas as pd
-from models.nn_config import Config
-from utils.files_io import load_json
 
 
 class NNModelTrainer:
 
     def __init__(self, config):
         self.config = config
-        self.model = self._init_model(config.hidden_layer_size)
+        self.model = self._init_model(self.config.hidden_layer_size)
 
     def _init_model(self, hidden_layer_units):
         input_ = Input(shape=(self.config.input_shape,))
@@ -27,17 +24,6 @@ class NNModelTrainer:
         return self.model
 
 
-class NNIO:
+class NNModelPredictor:
     def get_prediction(self):
-        X_train = load_json('data/neural_network/X_train.json')
-        y_train = load_json('data/neural_network/y_train.json')
-        X_train = pd.DataFrame(X_train)
-        y_train = pd.DataFrame(y_train)
-
-        X_test = load_json('data/neural_network/X_test.json')
-        X_test = pd.DataFrame(X_test)
-        config = Config()
-        model_trainer = NNModelTrainer(config)
-        model_trainer.train(X_train, y_train)
-        prediction = model_trainer.model.predict(X_test)
-        return prediction
+        pass
