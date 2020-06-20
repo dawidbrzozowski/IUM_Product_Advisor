@@ -2,19 +2,15 @@ from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Nadam
 import pandas as pd
-from tensorflow.keras.callbacks import TensorBoard
-
 from models.nn_config import Config
 from utils.files_io import load_json
-
-HIDDEN_LAYER_SIZE = 100
 
 
 class NNModelTrainer:
 
     def __init__(self, config):
         self.config = config
-        self.model = self._init_model(HIDDEN_LAYER_SIZE)
+        self.model = self._init_model(config.hidden_layer_size)
 
     def _init_model(self, hidden_layer_units):
         input_ = Input(shape=(self.config.input_shape,))
