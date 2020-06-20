@@ -61,10 +61,12 @@ def main():
 
     merged_data = create_model_input(clean_sessions, clean_products)
 
+    print('model_created')
     x, y = split_into_x_y(merged_data)
-    x = represent_session_as_single_row(x, clean_products)
+    x = represent_session_as_single_row(x, y, clean_products)
     y = represent_bought_products_as_matrix(y, clean_products)
 
+    print('data vectorised')
     write_json_file('xm', x)
     write_json_file('ym', y)
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
