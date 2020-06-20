@@ -1,6 +1,8 @@
+from tensorflow.keras.models import load_model
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Nadam
+import pandas as pd
 
 
 class NNModelTrainer:
@@ -25,5 +27,9 @@ class NNModelTrainer:
 
 
 class NNModelPredictor:
-    def get_prediction(self):
-        pass
+    def __init__(self, config):
+        self.model = load_model(config.model_save_path)
+
+    def get_prediction(self, session):
+        session_df = pd.DataFrame([session]) if type(session) == dict else pd.DataFrame(session)
+        return self.model.predict(session_df)
