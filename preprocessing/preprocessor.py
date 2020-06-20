@@ -63,12 +63,10 @@ def main():
     x = represent_session_as_single_row(x, clean_products)
     write_json_file('xm', x)
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
-    write_json_file(preprocessor.save_dir+'X_train.json', X_train)
-    write_json_file(preprocessor.save_dir+'y_train.json', y_train)
-    write_json_file(preprocessor.save_dir+'X_test.json', X_test)
-    write_json_file(preprocessor.save_dir+'y_test.json', y_test)
-    ...
-
+    write_json_file(preprocessor.save_dir + 'X_train.json', X_train)
+    write_json_file(preprocessor.save_dir + 'y_train.json', y_train)
+    write_json_file(preprocessor.save_dir + 'X_test.json', X_test)
+    write_json_file(preprocessor.save_dir + 'y_test.json', y_test)
 
 if __name__ == '__main__':
     main()
