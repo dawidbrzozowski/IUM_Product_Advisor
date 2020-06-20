@@ -2,9 +2,7 @@ from embeddings.vectorization import Vectorizer
 from preprocessing.data_cleaner import DataCleaner
 from utils.files_io import load_jsonl, write_json_file
 
-from preprocessing.merger import create_model_input, split_into_x_y, \
-    represent_session_as_single_row, represent_bought_products_as_matrix
-
+from preprocessing.merger import Merger
 from sklearn.model_selection import train_test_split
 
 DEFAULT_USERS_PATH = 'data/unprocessed/users.jsonl'
@@ -31,12 +29,27 @@ class NeuralNetworkPreprocessor(Preprocessor):
         self.save_dir = 'data/neural_network/'
         self.data_cleaner = DataCleaner()
         self.vectorizer = Vectorizer()
+        self.merger = Merger()
 
     def preprocess_data(self, raw_users, raw_sessions, raw_products):
         clean_users, clean_sessions, clean_products = self.data_cleaner.clear_data(raw_users, raw_sessions,
                                                                                    raw_products)
+        write_data(self.save_dir, clean_users, clean_sessions, clean_products)
         clean_products = self.vectorizer.prepare_products(clean_products)
-        return clean_users, clean_sessions, clean_products
+        merged_data = self.merger.create_model_input(clean_sessions, clean_products)
+
+        x, y = self.merger.split_into_x_y(merged_data)
+        x = self.merger.represent_session_as_single_row(x, y, clean_products)
+        y = self.merger.represent_bought_products_as_matrix(y, clean_products)
+
+        return x, y
+
+    def save_train_test_split(self, x, y, test_size=0.2):
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=42)
+        write_json_file(self.save_dir + 'X_train.json', X_train)
+        write_json_file(self.save_dir + 'y_train.json', y_train)
+        write_json_file(self.save_dir + 'X_test.json', X_test)
+        write_json_file(self.save_dir + 'y_test.json', y_test)
 
 
 def read_data(users_path=DEFAULT_USERS_PATH, sessions_path=DEFAULT_SESSIONS_PATH,
@@ -56,24 +69,9 @@ def write_data(save_dir, clean_users, clean_sessions, clean_products):
 def main():
     users, sessions, products = read_data()
     preprocessor = NeuralNetworkPreprocessor()
-    clean_users, clean_sessions, clean_products = preprocessor.preprocess_data(users, sessions, products)
-    write_data(preprocessor.save_dir, clean_users, clean_sessions, clean_products)
+    x, y = preprocessor.preprocess_data(users, sessions, products)
+    preprocessor.save_train_test_split(x, y)
 
-    merged_data = create_model_input(clean_sessions, clean_products)
-
-    print('model_created')
-    x, y = split_into_x_y(merged_data)
-    x = represent_session_as_single_row(x, y, clean_products)
-    y = represent_bought_products_as_matrix(y, clean_products)
-
-    print('data vectorised')
-    write_json_file('xm', x)
-    write_json_file('ym', y)
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
-    write_json_file(preprocessor.save_dir + 'X_train.json', X_train)
-    write_json_file(preprocessor.save_dir + 'y_train.json', y_train)
-    write_json_file(preprocessor.save_dir + 'X_test.json', X_test)
-    write_json_file(preprocessor.save_dir + 'y_test.json', y_test)
 
 if __name__ == '__main__':
     main()

@@ -3,8 +3,7 @@ from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Nadam
 import pandas as pd
 from tensorflow.keras.callbacks import TensorBoard
-import numpy as np
-from utils.files_io import load_json
+from utils.files_io import load_json, write_json_file
 
 HIDDEN_LAYER_SIZE = 100
 
@@ -26,10 +25,10 @@ class NNModelTrainer:
 
     def train(self, X_train, y_train, batch_size, epochs):
         callback = TensorBoard(log_dir="./logs")
-
         self.model.fit(X_train, y_train, validation_split=0.1,
                        callbacks=[callback], epochs=epochs, batch_size=batch_size)
-        self.model.save('models/saved_models/curr_model.h5')
+        # self.model.save('models/saved_models/curr_model.h5')
+        return self.model
 
 
 X_train = load_json('data/neural_network/X_train.json')
@@ -44,6 +43,8 @@ X_test = load_json('data/neural_network/X_test.json')
 X_test_to_compare = X_test.copy()
 X_test = pd.DataFrame(X_test)
 X_test.drop(columns=['session_id'], inplace=True)
+
+
 model_trainer = NNModelTrainer(288, 275)
 model_trainer.train(X_train, y_train, 100, 5)
 prediction = model_trainer.model.predict(X_test)
