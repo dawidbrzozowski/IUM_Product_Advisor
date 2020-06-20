@@ -20,7 +20,11 @@ class Vectorizer:
         products_with_vectorized_category = []
         category_vectorizer = CategoryVectorizer(products)
         for product in products:
-            product['category_path'] = category_vectorizer.get_vector_for_category_path(product['category_path'])
+            leaf_names = category_vectorizer.get_all_leafs()
+            leafs_vectorized = category_vectorizer.get_vector_for_category_path(product['category_path'])
+            product['leafs'] = {}
+            for leaf_name, leaf_vectorized in zip(leaf_names, leafs_vectorized):
+                product['leafs'][leaf_name] = leaf_vectorized
             products_with_vectorized_category.append(product)
         return products_with_vectorized_category
 
@@ -43,9 +47,12 @@ class CategoryVectorizer:
         leaf_name = self._tree.get_leaf_from_category_path(category_path)
         return self._leaf_vectors.get(leaf_name)
 
+    def get_all_leafs(self):
+        return self._tree.get_all_leafs()
+
     def _prepare_vectorization_for_leafs(self):
         leafs_as_vectors = {}
-        for leaf in self._tree.get_all_leafs():
+        for leaf in self.get_all_leafs():
             leafs_as_vectors[leaf] = self._prepare_vectorization_for_leaf(leaf)
         return leafs_as_vectors
 
