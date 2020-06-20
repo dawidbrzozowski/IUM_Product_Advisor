@@ -51,5 +51,27 @@ model_trainer = NNModelTrainer(288, 275)
 model_trainer.train(X_train, y_train, 100, 20)
 prediction = model_trainer.model.predict(X_test)
 
-prediction = [get_idx_of_predictions_over_threshold(0.02, pred) for pred in prediction]
-print(prediction)
+clean_products = load_json('data/neural_network/clean-products.json')
+
+def get_prod_id_from_network_column_id(network_id, products):
+    for i, prod in enumerate(products):
+        if i == network_id:
+            return prod['product_id']
+
+processed_prediction = []
+for single_pred in prediction:
+    single_dict_pred = {}
+    for i, single_pred_for_product in enumerate(single_pred):
+        product_id = get_prod_id_from_network_column_id(i, clean_products)
+        single_dict_pred[product_id] = single_pred_for_product
+
+    sorted_single_dict_pred = sorted(single_dict_pred.items(), key=lambda x: x[1], reverse=True)
+    processed_prediction.append(sorted_single_dict_pred)
+
+print(processed_prediction[0])
+print('row len is ', len(processed_prediction[0]))
+print('number of rows is ', len(processed_prediction))
+
+
+# prediction = [get_idx_of_predictions_over_threshold(0.02, pred) for pred in prediction]
+# print(prediction)
