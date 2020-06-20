@@ -37,6 +37,11 @@ def represent_session_as_single_row(merged_data, clean_products):
         for leaf in single_session['leafs']:
             current_session_avg[leaf] += single_session['leafs'][leaf]
 
+    current_session_avg.pop('product_id')
+    current_session_avg.pop('leafs')
+    current_session_avg.pop('category_path')
+    averaged_sessions.append(current_session_avg)
+
     return averaged_sessions
 
 
@@ -71,6 +76,5 @@ def get_matching_x_y(X, Y):
         if y['session_id'] in x_sessions:
             Y_match.append(y)
 
-    write_json_file('xm', X_match)
     write_json_file('ym', Y_match)
     return X_match, Y_match
