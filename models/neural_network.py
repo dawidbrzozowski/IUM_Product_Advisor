@@ -1,8 +1,9 @@
-from keras import Model
-from keras.layers import Dense, Input, Dropout
-from keras.optimizers import adam
+from tensorflow.keras import Model
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.optimizers import Nadam
 import pandas as pd
-
+from tensorflow.keras.callbacks import TensorBoard
+import numpy as np
 from utils.files_io import load_json
 
 HIDDEN_LAYER_SIZE = 100
@@ -20,12 +21,19 @@ class NNModelTrainer:
         y = Dense(units=hidden_layer_units, activation='relu')(input_)
         y = Dense(units=self.output_shape, activation='sigmoid')(y)
         model = Model(input_, y)
-        model.compile(optimizer=adam(), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+        model.compile(optimizer=Nadam(), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
         return model
 
     def train(self, X_train, y_train, batch_size, epochs):
-        self.model.fit(X_train, y_train, validation_split=0.1, epochs=epochs, batch_size=batch_size)
+        callback = TensorBoard(log_dir="./logs")
+
+        self.model.fit(X_train, y_train, validation_split=0.1,
+                       callbacks=[callback], epochs=epochs, batch_size=batch_size)
         self.model.save('models/saved_models/curr_model.h5')
+
+
+def get_idx_of_predictions_over_threshold(threshold, prediction):
+    indexes_over_threshold = []
 
 
 X_train = load_json('data/neural_network/X_train.json')
@@ -36,4 +44,12 @@ X_train.drop(columns=['session_id'], inplace=True)
 y_train.drop(columns=['session_id'], inplace=True)
 print(y_train)
 
+X_test = load_json('data/neural_network/X_test.json')
+X_test = pd.DataFrame(X_test)
+X_test.drop(columns=['session_id'], inplace=True)
 model_trainer = NNModelTrainer(288, 275)
+model_trainer.train(X_train, y_train, 100, 20)
+prediction = model_trainer.model.predict(X_test)
+
+prediction = [get_idx_of_predictions_over_threshold(0.02, pred) for pred in prediction]
+print(prediction)
