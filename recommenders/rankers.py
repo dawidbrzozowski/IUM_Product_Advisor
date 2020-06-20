@@ -62,10 +62,6 @@ class NNRecommendationGenerator(RecommendationGenerator):
                     view_processed_predictions.append(
                         (product['product_name'], product['category_path'], vied_product_id[1]))
 
-        print('polecono: ')
-        for item in view_processed_predictions:
-            print(item[0], '\t\t', item[1], '\t', item[2])
-
         return view_processed_predictions
 
 nn = NNIO()

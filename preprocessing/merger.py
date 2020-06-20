@@ -1,8 +1,5 @@
 import pandas as pd
 
-from utils.files_io import write_json_file
-
-
 class Merger:
 
     def create_model_input(self, sessions, products):
@@ -11,7 +8,8 @@ class Merger:
 
         merged = sessions.merge(products, on='product_id')
         merged.sort_values(by=['session_id'], inplace=True)
-        merged_cleaned = merged.drop(columns=['purchase_id', 'product_name', 'offered_discount', 'user_id'])
+        merged_cleaned = merged.drop(
+            columns=['purchase_id', 'product_name', 'offered_discount', 'user_id'])
         return merged_cleaned.to_dict(orient='records')
 
     def get_bought_from_session(self, session_id, y):
@@ -97,6 +95,4 @@ class Merger:
         for y in Y:
             if y['session_id'] in x_sessions:
                 Y_match.append(y)
-
-        write_json_file('ym', Y_match)
         return X_match, Y_match

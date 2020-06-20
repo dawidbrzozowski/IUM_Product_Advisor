@@ -3,31 +3,31 @@ from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Nadam
 import pandas as pd
 from tensorflow.keras.callbacks import TensorBoard
-from utils.files_io import load_json, write_json_file
+
+from models.nn_config import Config
+from utils.files_io import load_json
 
 HIDDEN_LAYER_SIZE = 100
 
 
 class NNModelTrainer:
 
-    def __init__(self, input_shape, output_shape):
-        self.input_shape = input_shape
-        self.output_shape = output_shape
+    def __init__(self, config):
+        self.config = config
         self.model = self._init_model(HIDDEN_LAYER_SIZE)
 
     def _init_model(self, hidden_layer_units):
-        input_ = Input(shape=(self.input_shape,))
+        input_ = Input(shape=(self.config.input_shape,))
         y = Dense(units=hidden_layer_units, activation='relu')(input_)
-        y = Dense(units=self.output_shape, activation='sigmoid')(y)
+        y = Dense(units=self.config.output_shape, activation='sigmoid')(y)
         model = Model(input_, y)
         model.compile(optimizer=Nadam(), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
         return model
 
-    def train(self, X_train, y_train, batch_size, epochs):
-        callback = TensorBoard(log_dir="./logs")
+    def train(self, X_train, y_train):
         self.model.fit(X_train, y_train, validation_split=0.1,
-                       callbacks=[callback], epochs=epochs, batch_size=batch_size)
-        # self.model.save('models/saved_models/curr_model.h5')
+                       callbacks=[self.config.callback], epochs=self.config.epochs, batch_size=self.config.batch_size)
+        self.model.save(self.config.model_save_path)
         return self.model
 
 
@@ -37,40 +37,11 @@ class NNIO:
         y_train = load_json('data/neural_network/y_train.json')
         X_train = pd.DataFrame(X_train)
         y_train = pd.DataFrame(y_train)
-        X_train.drop(columns=['session_id'], inplace=True)
-        y_train.drop(columns=['session_id'], inplace=True)
-        print(y_train)
 
         X_test = load_json('data/neural_network/X_test.json')
-        X_test_to_compare = X_test.copy()
         X_test = pd.DataFrame(X_test)
-        X_test.drop(columns=['session_id'], inplace=True)
-
-        model_trainer = NNModelTrainer(288, 275)
-        model_trainer.train(X_train, y_train, 100, 5)
+        config = Config()
+        model_trainer = NNModelTrainer(config)
+        model_trainer.train(X_train, y_train)
         prediction = model_trainer.model.predict(X_test)
         return prediction
-
-# row_id = 1
-#     first_prod_column = 3
-#     last_prod_column_exclusive = len(X_test_to_compare[row_id]) - 11
-#     # temporary
-#     view = []
-#     print(len(X_test_to_compare[row_id]))
-#     for i, product_in_session in enumerate(X_test_to_compare[row_id]):
-#         if first_prod_column <= i < last_prod_column_exclusive and \
-#                 X_test_to_compare[row_id][product_in_session] != 0:
-#             view.append(product_in_session)
-#
-#     print(X_test_to_compare[row_id]['session_id'])
-#
-#     view_names = []
-#     for vied_product_id in view:
-#         for product in clean_products:
-#             if int(vied_product_id) == product['product_id']:
-#                 print('matched')
-#                 view_names.append((product['product_name'], product['category_path']))
-#
-#     print('obejrzano: ')
-#     for item in view_names:
-#         print(item)
