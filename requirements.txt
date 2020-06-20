@@ -5,3 +5,4 @@ keras
 maya~=0.6.1
 numpy~=1.18.2
 treelib~=1.6.1
+tensorflow-gpu~=2.1.0
