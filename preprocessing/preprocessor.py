@@ -46,19 +46,14 @@ class NeuralNetworkPreprocessor(Preprocessor):
 
     def save_train_test_split(self, x, y, test_size=0.2):
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=42)
-        self.perform_saving_train_test(X_train, X_test, y_train, y_test, with_session=True)
         X_train = self.drop_field_from_dataset('session_id', X_train)
         X_test = self.drop_field_from_dataset('session_id', X_test)
         y_train = self.drop_field_from_dataset('session_id', y_train)
         y_test = self.drop_field_from_dataset('session_id', y_test)
-        self.perform_saving_train_test(X_train, X_test, y_train, y_test, with_session=False)
-
-    def perform_saving_train_test(self, X_train, X_test, y_train, y_test, with_session):
-        save_suffix = '_session.json' if with_session else '.json'
-        write_json_file(self.save_dir + f'X_train{save_suffix}', X_train)
-        write_json_file(self.save_dir + f'y_train{save_suffix}', y_train)
-        write_json_file(self.save_dir + f'X_test{save_suffix}', X_test)
-        write_json_file(self.save_dir + f'y_test{save_suffix}', y_test)
+        write_json_file(self.save_dir + 'X_train.json', X_train)
+        write_json_file(self.save_dir + 'y_train.json', y_train)
+        write_json_file(self.save_dir + 'X_test.json', X_test)
+        write_json_file(self.save_dir + 'y_test.json', y_test)
 
     def drop_field_from_dataset(self, field, dataset):
         dataset_with_dropped_field = []
