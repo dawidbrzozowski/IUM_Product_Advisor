@@ -13,13 +13,23 @@
 	<h1>Recommendation for user with given id</h1>
 
      <!-- Main Input For Receiving Query to our ML -->
-    <form action="{{ url_for('predict')}}"method="post">
+    <form action="{{ url_for('predict_user')}}"method="post">
     	<input type="text" name="user_id" placeholder="Input user id here..."
        required="required" />
 
         <button type="submit">Predict</button>
     </form>
 
+     <h1>Recommendation for given session history</h1>
+        <form action="{{ url_for('predict_session')}}"method="post">
+    	<input type="text" name="viewed_product1" placeholder="Enter viewed product here" required="required" />
+    	<input type="text" name="viewed_product2" placeholder="Enter viewed product here" required="required" />
+    	<input type="text" name="viewed_product3" placeholder="Enter viewed product here" required="required" />
+    	<input type="text" name="viewed_product4" placeholder="Enter viewed product here" required="required" />
+    	<input type="text" name="viewed_product5" placeholder="Enter viewed product here" required="required" />
+
+        <button type="submit">Predict</button>
+    </form>
  </div>
 
    <br>

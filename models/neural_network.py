@@ -5,6 +5,12 @@ from tensorflow.keras.optimizers import Nadam
 import pandas as pd
 
 
+def prepare_data_before_model(data):
+    data_df = pd.DataFrame(data) if type(data) == list else pd.DataFrame([data])
+    data_df = data_df.reindex(sorted(data_df.columns), axis=1)
+    return data_df
+
+
 class NNModelTrainer:
 
     def __init__(self, config):
@@ -20,6 +26,8 @@ class NNModelTrainer:
         return model
 
     def train(self, X_train, y_train):
+        X_train = prepare_data_before_model(X_train)
+        y_train = prepare_data_before_model(y_train)
         self.model.fit(X_train, y_train, validation_split=0.1,
                        callbacks=[self.config.callback], epochs=self.config.epochs, batch_size=self.config.batch_size)
         self.model.save(self.config.model_save_path)
@@ -31,5 +39,6 @@ class NNModelPredictor:
         self.model = load_model(config.model_save_path)
 
     def get_prediction(self, session):
+        session = prepare_data_before_model(session)
         session_df = pd.DataFrame([session]) if type(session) == dict else pd.DataFrame(session)
         return self.model.predict(session_df)
