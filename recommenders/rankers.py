@@ -1,6 +1,7 @@
 from models.collaborative import DependencyFinder
+from models.nn_config import Config
 from utils.files_io import load_json
-from models.neural_network import NNIO
+from models.neural_network import NNModelPredictor
 
 
 class RecommendationGenerator:
@@ -23,11 +24,10 @@ class CollaborativeRecommendationGenerator(RecommendationGenerator):
 
 class NNRecommendationGenerator(RecommendationGenerator):
 
-    def __init__(self, prediction, sessions=None, recommendation_len=6):
+    def __init__(self, prediction, recommendation_len=6):
         self.current_recommendation = None
         self.prediction = prediction
         self.products = load_json('data/neural_network/clean-products.json')
-        self.sessions = sessions
         self.recommendation_len = recommendation_len
 
     def get_generated_recommendations(self):
@@ -55,17 +55,18 @@ class NNRecommendationGenerator(RecommendationGenerator):
 
     def _deserialise_nn_output(self, processed_prediction, row_id=0):
         view_processed_predictions = []
-        for vied_product_id in processed_prediction[row_id]:
+        for viewed_products in processed_prediction[row_id]:
             for product in self.products:
-                if int(vied_product_id[0]) == product['product_id']:
-                    print('matched')
+                if int(viewed_products[0]) == product['product_id']:
                     view_processed_predictions.append(
-                        (product['product_name'], product['category_path'], vied_product_id[1]))
+                        (product['product_name'], product['category_path'], viewed_products[1]))
 
         return view_processed_predictions
 
-nn = NNIO()
-prediction = nn.get_prediction()
+
+session = load_json('data/neural_network/test_session.json')
+nn = NNModelPredictor(Config())
+prediction = nn.get_prediction(session)
 recommendation_generator = NNRecommendationGenerator(prediction)
 recommendation = recommendation_generator.get_generated_recommendations()
 print(recommendation)
