@@ -44,6 +44,19 @@ def represent_session_as_single_row(merged_data, clean_products):
 
     return averaged_sessions
 
+def represent_bought_products_as_matrix(y, clean_products):
+    product_ids = [product['product_id'] for product in clean_products]
+    product_representation = {product_id: 0 for product_id in product_ids}
+
+    bought_product_representation = []
+    for single_session in y:
+        single_session.update(product_representation)
+        bought_product_id = single_session.pop('product_id')
+        single_session[bought_product_id] += 1
+        bought_product_representation.append(single_session)
+
+    return bought_product_representation
+
 
 # todo normalizacja kategorii i wystapien produktow
 

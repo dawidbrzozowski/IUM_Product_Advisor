@@ -2,7 +2,9 @@ from embeddings.vectorization import Vectorizer
 from preprocessing.data_cleaner import DataCleaner
 from utils.files_io import load_jsonl, write_json_file
 
-from preprocessing.merger import create_model_input, split_into_x_y, represent_session_as_single_row
+from preprocessing.merger import create_model_input, split_into_x_y, \
+    represent_session_as_single_row, represent_bought_products_as_matrix
+
 from sklearn.model_selection import train_test_split
 
 DEFAULT_USERS_PATH = 'data/unprocessed/users.jsonl'
@@ -61,7 +63,10 @@ def main():
 
     x, y = split_into_x_y(merged_data)
     x = represent_session_as_single_row(x, clean_products)
+    y = represent_bought_products_as_matrix(y, clean_products)
+
     write_json_file('xm', x)
+    write_json_file('ym', y)
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
     write_json_file(preprocessor.save_dir + 'X_train.json', X_train)
     write_json_file(preprocessor.save_dir + 'y_train.json', y_train)
