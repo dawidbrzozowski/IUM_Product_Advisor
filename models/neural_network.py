@@ -5,6 +5,7 @@ from tensorflow.keras.optimizers import Nadam
 import pandas as pd
 
 
+# Input data has to be in the same order every time.
 def prepare_data_before_model(data):
     data_df = pd.DataFrame(data) if type(data) == list else pd.DataFrame([data])
     data_df = data_df.reindex(sorted(data_df.columns), axis=1)

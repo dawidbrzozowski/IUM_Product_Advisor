@@ -1,5 +1,9 @@
 from embeddings.vectorization import Vectorizer
-from utils.files_io import load_json
+from utils.files_io import load_json, write_json_file
+
+DEFAULT_AGE = 0.5
+PRODUCTS_VECTORIZED_PATH = 'data/neural_network/products_vectorized_repr.json'
+CLEAN_PRODUCTS_PATH = 'data/neural_network/clean-products.json'
 
 
 class SessionRecommendationPreprocessor:
@@ -20,7 +24,25 @@ class SessionRecommendationPreprocessor:
             products_with_id_as_key[product_id] = product
         return products_with_id_as_key
 
-    def add(self, product1: dict, product2: dict):
+    def preprocess(self, viewed_products_ids: list):
+        product_repr = load_json(PRODUCTS_VECTORIZED_PATH)
+        sum_session = None
+        for product_id in viewed_products_ids:
+            sum_session = self._add_products(sum_session, product_repr[product_id])
+        return self._get_average_session_from_products_sum(sum_session)
+
+    def _get_average_session_from_products_sum(self, sum_session):
+        avg_session = sum_session
+        product_ids_vectorized = avg_session.pop('vectorized_product_id')
+        for product_id in product_ids_vectorized:
+            avg_session[product_id] = product_ids_vectorized[product_id]
+        leafs = avg_session.pop('leafs')
+        for leaf in leafs:
+            avg_session[leaf] = leafs[leaf]
+        avg_session['age'] = DEFAULT_AGE
+        return avg_session
+
+    def _add_products(self, product1: dict, product2: dict):
         if product1 is None and product2 is not None:
             return product2
         elif product1 is not None and product2 is None:
@@ -34,20 +56,8 @@ class SessionRecommendationPreprocessor:
                 product1['vectorized_product_id'][product_id] += product2['vectorized_product_id'][product_id]
             return product1
 
-    def sum_session_to_avg_session(self, sum_session):
-        avg_session = sum_session
-        product_ids_vectorized = avg_session.pop('vectorized_product_id')
-        for product_id in product_ids_vectorized:
-            avg_session[product_id] = product_ids_vectorized[product_id]
-        leafs = avg_session.pop('leafs')
-        for leaf in leafs:
-            avg_session[leaf] = leafs[leaf]
-        avg_session['age'] = 0.5
-        return avg_session
 
-    def preprocess(self, viewed_products_ids: list):
-        product_repr = load_json('data/neural_network/product_repr.json')
-        sum_session = None
-        for product_id in viewed_products_ids:
-            sum_session = self.add(sum_session, product_repr[product_id])
-        return self.sum_session_to_avg_session(sum_session)
+if __name__ == '__main__':
+    srp = SessionRecommendationPreprocessor()
+    products_vectorized = srp.prepare_products_vectorized(load_json(CLEAN_PRODUCTS_PATH))
+    write_json_file(PRODUCTS_VECTORIZED_PATH, products_vectorized)
