@@ -10,6 +10,7 @@ srp = SessionRecommendationPreprocessor()
 recommendation_generator = NNRecommendationGenerator()
 products_representation = srp.create_product_representation_for_web_app()
 
+
 @app.route('/')
 def home():
     return render_template('index.html', choices=products_representation)
@@ -20,8 +21,15 @@ def predict_user():
     '''
     For rendering results on HTML GUI
     '''
-    x = request.form.get('user_id')
-    return render_template('index.html', choices=products_representation, prediction_text=f'User{x}')
+    user_id = request.form.get('user_id')
+    session = srp.preprocess_user(user_id)
+    recommendations = recommendation_generator.get_generated_recommendations(session)
+    recommendation_texts = []
+    for recommendation in recommendations:
+        recommendation_texts.append(str(recommendation))
+
+    print('[LOG INFO] prediction was made for user ', user_id)
+    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
 
 
 @app.route('/predict_session', methods=['POST'])
@@ -38,11 +46,13 @@ def predict_from_products():
     '''
     products_repr = request.form.getlist('choices')
     product_ids = srp.web_app_product_representation_to_product_ids(products_repr)
-    session = srp.preprocess(product_ids)
+    session = srp.preprocess_products(product_ids)
     recommendations = recommendation_generator.get_generated_recommendations(session)
     recommendation_texts = []
     for recommendation in recommendations:
         recommendation_texts.append(str(recommendation))
+
+    print('[LOG INFO] prediction was made for product: ', products_repr)
     return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
 
 
