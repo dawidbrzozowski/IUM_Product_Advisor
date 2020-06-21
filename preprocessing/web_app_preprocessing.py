@@ -7,6 +7,20 @@ CLEAN_PRODUCTS_PATH = 'data/neural_network/clean-products.json'
 
 
 class SessionRecommendationPreprocessor:
+    def __init__(self):
+        self.clean_products = load_json(CLEAN_PRODUCTS_PATH)
+
+    def create_product_representation_for_web_app(self):
+        return [f'{product["product_name"]}:{product["category_path"]}' for product in self.clean_products]
+
+    def web_app_product_representation_to_product_ids(self, products):
+        product_ids = []
+        for product_repr in products:
+            product_name = product_repr.split(':')[0]
+            for product in self.clean_products:
+                if product['product_name'] == product_name:
+                    product_ids.append(product['product_id'])
+        return product_ids
 
     def prepare_products_vectorized(self, cleaned_products):
         vectorizer = Vectorizer()
@@ -28,7 +42,7 @@ class SessionRecommendationPreprocessor:
         product_repr = load_json(PRODUCTS_VECTORIZED_PATH)
         sum_session = None
         for product_id in viewed_products_ids:
-            sum_session = self._add_products(sum_session, product_repr[product_id])
+            sum_session = self._add_products(sum_session, product_repr[str(product_id)])
         return self._get_average_session_from_products_sum(sum_session)
 
     def _get_average_session_from_products_sum(self, sum_session):

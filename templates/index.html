@@ -1,40 +1,44 @@
-
 <!DOCTYPE html>
-<html >
+<html>
 <!--From https://codepen.io/frytyler/pen/EGdtg-->
 <head>
-  <meta charset="UTF-8">
-  <title>mikroserwis</title>
+    <meta charset="UTF-8">
+    <title>mikroserwis</title>
 
 </head>
 
 <body>
- <div class="user_recommendation">
-	<h1>Recommendation for user with given id</h1>
+<div class="user_recommendation">
+    <h1>Recommendation for user with given id</h1>
 
-     <!-- Main Input For Receiving Query to our ML -->
-    <form action="{{ url_for('predict_user')}}"method="post">
-    	<input type="text" name="user_id" placeholder="Input user id here..."
-       required="required" />
-
-        <button type="submit">Predict</button>
-    </form>
-
-     <h1>Recommendation for given session history</h1>
-        <form action="{{ url_for('predict_session')}}"method="post">
-    	<input type="text" name="viewed_product1" placeholder="Enter viewed product here" required="required" />
-    	<input type="text" name="viewed_product2" placeholder="Enter viewed product here" required="required" />
-    	<input type="text" name="viewed_product3" placeholder="Enter viewed product here" required="required" />
-    	<input type="text" name="viewed_product4" placeholder="Enter viewed product here" required="required" />
-    	<input type="text" name="viewed_product5" placeholder="Enter viewed product here" required="required" />
+    <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict_user')}}" method="post">
+        <input type="text" name="user_id" placeholder="Input user id here..."
+               required="required"/>
 
         <button type="submit">Predict</button>
     </form>
- </div>
+    <br><br>
+</div>
+<div class="product_recommendation">
+    <h1>Recommendation based on viewed products.</h1>
+    <form action="{{ url_for('predict_from_products')}}" method="post">
+        <select multiple name=choices method="post" action="/">
+            {% for choice in choices %}
+            <option value="{{choice}}" selected>{{choice}}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Predict</button>
 
-   <br>
-   <br>
-   {{ prediction_text }}
+    </form>
+</div>
+
+<br>
+<br>
+{% for prediction in prediction_text %}
+{{prediction}}
+<br>
+{% endfor %}
 
 </body>
 </html>
