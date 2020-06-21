@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class Merger:
 
     def create_model_input(self, sessions, products):
