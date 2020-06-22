@@ -33,6 +33,12 @@
 
     </form>
 </div>
+<br>
+{% for prediction in prediction_text_nn %}
+{{prediction}}
+<br>
+{% endfor %}
+<br>
 <br><br><br>
 <div class="user_recommendation">
     <h1>Baseline Recommendations</h1>
@@ -60,13 +66,12 @@
     </form>
 </div>
 
-
 <br>
-<br>
-{% for prediction in prediction_text %}
+{% for prediction in prediction_text_base %}
 {{prediction}}
 <br>
 {% endfor %}
+<br>
 
 </body>
 </html>

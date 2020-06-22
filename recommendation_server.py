@@ -50,7 +50,7 @@ def predict_user_nn():
     recommendation_texts = get_recommendation_for_user_nn(user_id)
 
     print('[LOG INFO] prediction was made for user ', user_id)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_nn=recommendation_texts)
 
 
 @app.route('/predict_from_products_nn', methods=['POST'])
@@ -62,7 +62,7 @@ def predict_from_products_nn():
     product_ids = srp.web_app_product_representation_to_product_ids(products_repr)
     recommendation_texts = get_recommendation_for_products_nn(product_ids)
     print('[LOG INFO] prediction was made for product: ', products_repr)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_nn=recommendation_texts)
 
 
 @app.route('/predict_api_nn', methods=['POST'])
@@ -89,7 +89,7 @@ def predict_user_baseline():
     # todo wyznaczyc rekomendacje dla usera przez baseline
 
     print('[LOG INFO] prediction was made for user ', user_id)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_base=recommendation_texts)
 
 
 @app.route('/predict_from_products_baseline', methods=['POST'])
@@ -102,7 +102,7 @@ def predict_from_products_baseline():
 
     # todo wyznaczyc rekomendacje dla historii produktow przez baseline
     print('[LOG INFO] prediction was made for product: ', products_repr)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_base=recommendation_texts)
 
 
 @app.route('/predict_api_baseline', methods=['POST'])
