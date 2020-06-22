@@ -41,7 +41,6 @@ class SessionRecommendationPreprocessor:
         return products_with_id_as_key
 
     def preprocess_products(self, viewed_products_ids: list):
-        self.preprocess_user(110)
         product_repr = load_json(PRODUCTS_VECTORIZED_PATH)
         sum_session = None
         for product_id in viewed_products_ids:
@@ -77,7 +76,7 @@ class SessionRecommendationPreprocessor:
 
     @staticmethod
     def _is_proper_non_buy_session_for_user(session, user_id, vectorised_products):
-        return session['user_id'] == int(user_id) and session['event_type'] is not 'BUT_PRODUCT' \
+        return session['user_id'] == int(user_id) and session['event_type'] is not 'BUY_PRODUCT' \
                and str(session['product_id']) in vectorised_products
 
     @staticmethod

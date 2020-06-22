@@ -61,10 +61,10 @@ def predict_api():
     '''
     For direct API calls trought request
     '''
-    data = request.get_json(force=True)
+    session = request.get_json()
 
-    output = 4
-    return jsonify(output)
+    recommendations = recommendation_generator.get_generated_recommendations(session)
+    return jsonify(recommendations)
 
 
 if __name__ == "__main__":
