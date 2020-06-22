@@ -22,9 +22,10 @@ class CollaborativeRecommendationGenerator(RecommendationGenerator):
         self.recommendation_len = recommendation_len
 
     def get_generated_recommendations(self, session):
+        print('W collaborative')
         prediction = self.model_predictor.get_prediction(session)
         output = self._deserialise_collaborative_output(prediction)
-        return sorted(output, key=lambda x: x[1], reverse=True)[:self.recommendation_len]
+        return output[:self.recommendation_len]
 
     def _get_prod_id_from_matrix_row(self, matrix_row):
         for i, prod in enumerate(self.products):

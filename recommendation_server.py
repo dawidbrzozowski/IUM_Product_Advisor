@@ -17,6 +17,7 @@ def get_recommendation_for_user(user_id, recommendation_generator):
     recommendations = recommendation_generator.get_generated_recommendations(session)
     recommendation_texts = []
     for recommendation in recommendations:
+        print(type(recommendation_generator), recommendation)
         recommendation_texts.append(str(recommendation))
     return recommendation_texts
 
@@ -88,6 +89,7 @@ def predict_user_baseline():
     For rendering results on HTML GUI
     '''
     user_id = request.form.get('user_id')
+    print('wyznaczam dla', user_id)
     # todo wyznaczyc rekomendacje dla usera przez baseline
     recommendation_texts = get_recommendation_for_user(user_id, recommendation_generator_baseline)
     print('[LOG INFO] prediction was made for user ', user_id)
