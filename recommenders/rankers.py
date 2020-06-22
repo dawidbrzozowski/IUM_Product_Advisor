@@ -74,5 +74,5 @@ class NNRecommendationGenerator(RecommendationGenerator):
             for product in self.products:
                 if int(viewed_products[0]) == product['product_id']:
                     view_processed_predictions.append(
-                        (product['product_name'], product['category_path'], viewed_products[1]))
+                        (product['product_name'], product['category_path']))
         return view_processed_predictions
