@@ -31,14 +31,6 @@ def get_recommendation_for_products(product_ids, recommendation_generator):
     return recommendation_texts
 
 
-def get_recommendation_for_user_baseline(user_id):
-    pass
-
-
-def get_recommendation_for_products_baseline(product_ids):
-    pass
-
-
 @app.route('/')
 def home():
     return render_template('index.html', choices=products_representation)
@@ -53,7 +45,7 @@ def predict_user_nn():
     recommendation_texts = get_recommendation_for_user(user_id, recommendation_generator_nn)
 
     print('[LOG INFO] prediction was made for user ', user_id)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_nn=recommendation_texts)
 
 
 @app.route('/predict_from_products_nn', methods=['POST'])
@@ -65,7 +57,7 @@ def predict_from_products_nn():
     product_ids = srp.web_app_product_representation_to_product_ids(products_repr)
     recommendation_texts = get_recommendation_for_products(product_ids, recommendation_generator_nn)
     print('[LOG INFO] prediction was made for product: ', products_repr)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_nn=recommendation_texts)
 
 
 @app.route('/predict_api_nn', methods=['POST'])
@@ -90,10 +82,9 @@ def predict_user_baseline():
     '''
     user_id = request.form.get('user_id')
     print('wyznaczam dla', user_id)
-    # todo wyznaczyc rekomendacje dla usera przez baseline
     recommendation_texts = get_recommendation_for_user(user_id, recommendation_generator_baseline)
     print('[LOG INFO] prediction was made for user ', user_id)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_base=recommendation_texts)
 
 
 @app.route('/predict_from_products_baseline', methods=['POST'])
@@ -104,9 +95,8 @@ def predict_from_products_baseline():
     products_repr = request.form.getlist('choices')
     product_ids = srp.web_app_product_representation_to_product_ids(products_repr)
     recommendation_texts = get_recommendation_for_products(product_ids, recommendation_generator_baseline)
-    # todo wyznaczyc rekomendacje dla historii produktow przez baseline
     print('[LOG INFO] prediction was made for product: ', products_repr)
-    return render_template('index.html', choices=products_representation, prediction_text=recommendation_texts)
+    return render_template('index.html', choices=products_representation, prediction_text_base=recommendation_texts)
 
 
 @app.route('/predict_api_baseline', methods=['POST'])
@@ -116,11 +106,13 @@ def predict_api_baseline():
     '''
     req = request.get_json()
     if 'user_id' in req:
-        pass # todo
+        recommendations = get_recommendation_for_user(req['user_id'], recommendation_generator_baseline)
     elif 'session_history' in req:
-        pass # todo
+        products_repr = request.form.getlist('choices')
+        product_ids = srp.web_app_product_representation_to_product_ids(products_repr)
+        recommendations = get_recommendation_for_products(product_ids, recommendation_generator_baseline)
     else:
-        recommendations = 'No valid data provided.'
+        recommendations = 'No valid data provided'
     return jsonify(recommendations)
 
 

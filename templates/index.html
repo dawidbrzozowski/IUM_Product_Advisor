@@ -32,6 +32,12 @@
         <button type="submit">Predict</button>
 
     </form>
+    <br>
+    {% for prediction in prediction_text_nn %}
+    {{prediction}}
+    <br>
+    {% endfor %}
+    <br>
 </div>
 <br><br><br>
 <div class="user_recommendation">
@@ -63,7 +69,7 @@
 
 <br>
 <br>
-{% for prediction in prediction_text %}
+{% for prediction in prediction_text_base %}
 {{prediction}}
 <br>
 {% endfor %}
