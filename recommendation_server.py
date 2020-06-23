@@ -108,9 +108,7 @@ def predict_api_baseline():
     if 'user_id' in req:
         recommendations = get_recommendation_for_user(req['user_id'], recommendation_generator_baseline)
     elif 'session_history' in req:
-        products_repr = request.form.getlist('choices')
-        product_ids = srp.web_app_product_representation_to_product_ids(products_repr)
-        recommendations = get_recommendation_for_products(product_ids, recommendation_generator_baseline)
+        recommendations = get_recommendation_for_products(req['session_history'], recommendation_generator_baseline)
     else:
         recommendations = 'No valid data provided'
     return jsonify(recommendations)

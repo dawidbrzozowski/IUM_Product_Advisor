@@ -1,6 +1,10 @@
 from utils.files_io import load_json
 import numpy as np
 
+DEF_FIRST_PRODUCT_COLUMN = 3
+AGE_PLUS_CATEGORIES = 12
+DEFAULT_DEPENDENCY_DEPTH = 3
+
 
 def load_sessions_data():
     return load_json('data/clean-sessions.json')
@@ -103,7 +107,7 @@ class BaselineModelPredictor:
         return False
 
     def _get_dependand_columns_to_given_rows(self, viewed_products_as_rows, matrix):
-        dependency_depth = 3
+        dependency_depth = DEFAULT_DEPENDENCY_DEPTH
         deep_dependant_products = []
         for i in range(dependency_depth):
             dependant_products = {}
@@ -138,8 +142,8 @@ class BaselineModelPredictor:
 
     def _get_viewed_products_in_session(self, session):
         view = []
-        first_prod_column = 3
-        last_prod_column_exclusive = len(session) - 12
+        first_prod_column = DEF_FIRST_PRODUCT_COLUMN
+        last_prod_column_exclusive = len(session) - AGE_PLUS_CATEGORIES
         for i, product_in_session in enumerate(session):
             if first_prod_column <= i < last_prod_column_exclusive and \
                     session[product_in_session] != 0:
