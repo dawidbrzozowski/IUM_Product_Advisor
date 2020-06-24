@@ -2,6 +2,7 @@ from models.collaborative import DependencyFinder
 from models.nn_config import Config
 from utils.files_io import load_json
 from models.neural_network import NNModelPredictor
+from models.collaborative import BaselineModelPredictor
 
 DEFAULT_RECOMMENDATION_LEN = 6
 CLEAN_PRODUCTS_PATH = 'data/neural_network/clean-products.json'
@@ -15,14 +16,31 @@ class RecommendationGenerator:
 
 class CollaborativeRecommendationGenerator(RecommendationGenerator):
 
-    def __init__(self, products, sessions):
-        self.generated_recommendation = None
-        self.dependency_finder = DependencyFinder(products)
-        self.sessions = sessions
+    def __init__(self, recommendation_len=DEFAULT_RECOMMENDATION_LEN):
+        self.model_predictor = BaselineModelPredictor()
+        self.products = load_json(CLEAN_PRODUCTS_PATH)
+        self.recommendation_len = recommendation_len
 
-    def generate_recommendation(self, session):
-        self.dependency_finder.parse_sessions_to_find_dependencies(self.sessions)
-        dependencies = self.dependency_finder.dependencies
+    def get_generated_recommendations(self, session):
+        print('W collaborative')
+        prediction = self.model_predictor.get_prediction(session)
+        output = self._deserialise_collaborative_output(prediction)
+        return output[:self.recommendation_len]
+
+    def _get_prod_id_from_matrix_row(self, matrix_row):
+        for i, prod in enumerate(self.products):
+            if i == matrix_row:
+                return prod['product_id']
+
+    def _deserialise_collaborative_output(self, processed_prediction):
+        deserialised_output = []
+        for dependant_product in processed_prediction:
+            for product in self.products:
+                if self._get_prod_id_from_matrix_row(dependant_product[0]) == product['product_id']:
+                    deserialised_output.append(
+                        (product['product_name'], product['category_path'], dependant_product[1]))
+
+        return deserialised_output
 
 
 class NNRecommendationGenerator(RecommendationGenerator):

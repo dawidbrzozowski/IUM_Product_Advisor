@@ -9,10 +9,11 @@
 
 <body>
 <div class="user_recommendation">
-    <h1>Recommendation for user with given id</h1>
+    <h1>Neural Network Recommendations</h1>
+    <h2>Recommendation for user with given id</h2>
 
     <!-- Main Input For Receiving Query to our ML -->
-    <form action="{{ url_for('predict_user')}}" method="post">
+    <form action="{{ url_for('predict_user_nn')}}" method="post">
         <input type="text" name="user_id" placeholder="Input user id here..."
                required="required"/>
 
@@ -21,8 +22,40 @@
     <br><br>
 </div>
 <div class="product_recommendation">
-    <h1>Recommendation based on viewed products.</h1>
-    <form action="{{ url_for('predict_from_products')}}" method="post">
+    <h2>Recommendation based on viewed products.</h2>
+    <form action="{{ url_for('predict_from_products_nn')}}" method="post">
+        <select multiple name=choices method="post" action="/">
+            {% for choice in choices %}
+            <option value="{{choice}}" selected>{{choice}}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Predict</button>
+
+    </form>
+    <br>
+    {% for prediction in prediction_text_nn %}
+    {{prediction}}
+    <br>
+    {% endfor %}
+    <br>
+</div>
+<br><br><br>
+<div class="user_recommendation">
+    <h1>Baseline Recommendations</h1>
+    <h2>Recommendation for user with given id</h2>
+
+    <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict_user_baseline')}}" method="post">
+        <input type="text" name="user_id" placeholder="Input user id here..."
+               required="required"/>
+
+        <button type="submit">Predict</button>
+    </form>
+    <br><br>
+</div>
+<div class="product_recommendation">
+    <h2>Recommendation based on viewed products.</h2>
+    <form action="{{ url_for('predict_from_products_baseline')}}" method="post">
         <select multiple name=choices method="post" action="/">
             {% for choice in choices %}
             <option value="{{choice}}" selected>{{choice}}</option>
@@ -33,9 +66,10 @@
     </form>
 </div>
 
+
 <br>
 <br>
-{% for prediction in prediction_text %}
+{% for prediction in prediction_text_base %}
 {{prediction}}
 <br>
 {% endfor %}
